@@ -133,6 +133,10 @@ export const createApp = async () => {
     res.json({ success: true, message: 'Server is running', timestamp: new Date().toISOString() });
   });
 
+  app.get('/favicon.ico', (req, res) => {
+    res.sendStatus(204);
+  });
+
   app.get('/', (req, res) => {
     res.json({
       success: true,
