@@ -19,6 +19,10 @@ dotenv.config();
 
 const app = express();
 
+// Trust proxy headers (required for express-rate-limit and secure cookies behind
+// Vercel / Render / Nginx reverse proxies).
+app.set('trust proxy', 1);
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -61,10 +65,20 @@ app.use('/api/v1/faqs', faqsRoutes);
 app.use('/api/v1/leads', leadsRoutes);
 app.use('/api/v1/auth', authRoutes);
 
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    name: 'Standard General Construction Inc. API',
+    version: '1.0.0',
+    message: 'API is running. Use /api/health for status.',
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'Server is running', timestamp: new Date().toISOString() });
 });
 
+// 404 for any non-API or unknown routes
 app.use('*', (req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
