@@ -35,10 +35,23 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
+  .split(',')
+  .map(origin => origin.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
